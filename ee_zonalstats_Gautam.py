@@ -32,6 +32,8 @@ polygons["eepoly"] = eepolys
 #Use ee polys to make image collections, and extract zonal stats. Ammend start/end dates, bands, and parent image collection if necessary
 for eepol in eepolys:
     harmon = ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED").filterDate("2022-11-01", "2023-06-30").filterBounds(eepol).select(['B2', "B3", "B4", "B5", "B6", "B7", "B8", "B8A"]).filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 30))
+    #TODO
+    #Apply some cloud mask to avoid grabbing clouds or shadows inside the polygons
     def zstats(img):
         dict = img.reduceRegion(ee.Reducer.mean(), eepol, 10)
         date = img.date().format("YYYY-MM-dd")  # Get date as a string
@@ -45,7 +47,7 @@ for eepol in eepolys:
 #Add details from parent dataframe to zonal stats dicts
 for i in range(len(zonaldicts)):
     zonaldicts[i]['Irr'] = pd.Series([polygons.Irr[i]]*len(zonaldicts[i]['B2']))
-    zonaldicts[i]['SDate'] = pd.Series([polygons.sowing[i]]*len(zonaldicts[i]['B2']))
+    zonaldicts[i]['SDate'] = pd.Series([polygons.sowing[i]]*len(zonaldicts[i]['B2']))#double check the date format here and convert it to the same format from the images (or vice-versa).
     zonaldicts[i]['Farmer'] = pd.Series([polygons.fName[i]]*len(zonaldicts[i]['B2']))
     zonaldicts[i]['GID'] = pd.Series([polygons.GID[i]]*len(zonaldicts[i]['B2']))
 
